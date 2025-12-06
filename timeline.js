@@ -138,7 +138,8 @@ export class TimelineManager {
         if (!this.isDraggingPlayhead) return;
 
         const rect = this.timeline.getBoundingClientRect();
-        const x = e.clientX - rect.left + this.container.scrollLeft;
+        // getBoundingClientRect already accounts for scroll position
+        const x = e.clientX - rect.left;
         const time = this.pixelsToTime(x);
 
         this.setCurrentTime(time);
@@ -158,7 +159,8 @@ export class TimelineManager {
         if (e.target.closest('.playhead-handle')) return;
 
         const rect = this.timeline.getBoundingClientRect();
-        const x = e.clientX - rect.left + this.container.scrollLeft;
+        // getBoundingClientRect already accounts for scroll position
+        const x = e.clientX - rect.left;
         const time = this.pixelsToTime(x);
 
         this.setCurrentTime(time);
