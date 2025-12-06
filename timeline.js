@@ -12,7 +12,7 @@ export class TimelineManager {
         this.duration = 0;
         this.currentTime = 0;
         this.zoom = 1;
-        this.minZoom = 0.01;
+        this.minZoom = 0.1;
         this.maxZoom = 10;
         this.pixelsPerSecond = 50; // Base pixels per second
 

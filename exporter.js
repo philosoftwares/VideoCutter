@@ -12,6 +12,21 @@ export class VideoExporter {
         this.onStatusChange = () => { };
         this.onComplete = () => { };
         this.onError = () => { };
+
+        // Export presets: preset -> { ffmpegPreset, crf, audioBitrate }
+        this.presets = {
+            ultrafast: { ffmpegPreset: 'ultrafast', crf: 28, audioBitrate: '128k' },
+            fast: { ffmpegPreset: 'ultrafast', crf: 18, audioBitrate: '192k' },
+            balanced: { ffmpegPreset: 'fast', crf: 18, audioBitrate: '192k' },
+            quality: { ffmpegPreset: 'medium', crf: 16, audioBitrate: '256k' },
+            best: { ffmpegPreset: 'slow', crf: 14, audioBitrate: '320k' }
+        };
+    }
+
+    getPresetSettings() {
+        const presetSelect = document.getElementById('export-preset');
+        const presetName = presetSelect?.value || 'fast';
+        return this.presets[presetName] || this.presets.fast;
     }
 
     async export(videoFile, segments, videoDuration) {
@@ -206,15 +221,18 @@ export class VideoExporter {
                     // This is slower but produces accurate timestamps
                     this.onStatusChange(`Processing part ${i + 1}/${ranges.length}...`);
 
+                    // Get preset settings from dropdown
+                    const preset = this.getPresetSettings();
+
                     await this.ffmpeg.exec([
                         '-i', inputName,
                         '-ss', range.start.toFixed(3),
                         '-t', duration.toFixed(3),
                         '-c:v', 'libx264',
-                        '-preset', 'ultrafast',
-                        '-crf', '18',
+                        '-preset', preset.ffmpegPreset,
+                        '-crf', preset.crf.toString(),
                         '-c:a', 'aac',
-                        '-b:a', '192k',
+                        '-b:a', preset.audioBitrate,
                         '-avoid_negative_ts', 'make_zero',
                         tempName
                     ]);

@@ -251,6 +251,42 @@ class VideoCutterApp {
                 this.timelineManager.setCurrentTime(time);
             }
         });
+
+        // Volume control - only affects playback, not export
+        const volumeSlider = document.getElementById('volume-slider');
+        const muteBtn = document.getElementById('mute-btn');
+        const iconVolume = muteBtn.querySelector('.icon-volume');
+        const iconMuted = muteBtn.querySelector('.icon-muted');
+        let previousVolume = 100;
+
+        volumeSlider.addEventListener('input', (e) => {
+            const volume = parseInt(e.target.value, 10) / 100;
+            this.videoPlayer.volume = volume;
+            this.updateVolumeIcon(volume, iconVolume, iconMuted);
+        });
+
+        muteBtn.addEventListener('click', () => {
+            if (this.videoPlayer.volume > 0) {
+                previousVolume = volumeSlider.value;
+                volumeSlider.value = 0;
+                this.videoPlayer.volume = 0;
+                this.updateVolumeIcon(0, iconVolume, iconMuted);
+            } else {
+                volumeSlider.value = previousVolume;
+                this.videoPlayer.volume = previousVolume / 100;
+                this.updateVolumeIcon(previousVolume / 100, iconVolume, iconMuted);
+            }
+        });
+    }
+
+    updateVolumeIcon(volume, iconVolume, iconMuted) {
+        if (volume === 0) {
+            iconVolume.classList.add('hidden');
+            iconMuted.classList.remove('hidden');
+        } else {
+            iconVolume.classList.remove('hidden');
+            iconMuted.classList.add('hidden');
+        }
     }
 
     onTimelineTimeChange(time) {
