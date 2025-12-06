@@ -379,6 +379,24 @@ class VideoCutterApp {
             this.showScreen('complete');
         };
 
+        this.exporter.onComplete = (blob, filename) => {
+            this.exportedBlob = blob;
+            this.exportedFilename = filename;
+
+            // Show preset used
+            const presetSelect = document.getElementById('export-preset');
+            const presetName = presetSelect.options[presetSelect.selectedIndex].text;
+            document.getElementById('export-preset-info').textContent = `Preset: ${presetName}`;
+
+            document.getElementById('export-filename').textContent = filename;
+            this.showScreen('complete');
+        };
+
+        // Show preset info in progress
+        const presetSelect = document.getElementById('export-preset');
+        const presetName = presetSelect.options[presetSelect.selectedIndex].text;
+        document.getElementById('export-details').textContent = `Using preset: ${presetName}`;
+
         this.exporter.onError = (error) => {
             console.error('Export error:', error);
             alert('Export failed: ' + error.message);

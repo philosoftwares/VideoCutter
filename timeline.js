@@ -12,7 +12,7 @@ export class TimelineManager {
         this.duration = 0;
         this.currentTime = 0;
         this.zoom = 1;
-        this.minZoom = 0.1;
+        this.minZoom = 0.01;
         this.maxZoom = 10;
         this.pixelsPerSecond = 50; // Base pixels per second
 
@@ -260,7 +260,8 @@ export class TimelineManager {
     }
 
     zoomOut() {
-        this.setZoom(this.zoom - 0.25);
+        // Limit button zoom out to 10%
+        this.setZoom(Math.max(0.1, this.zoom - 0.25));
     }
 
     getCurrentTime() {
