@@ -75,7 +75,11 @@ export class VideoExporter {
             // Create blob and return
             const blob = new Blob([data.buffer], { type: this.getMimeType(ext) });
 
-            this.onComplete(blob, `cut_${videoFile.name}`);
+            // Generate filename: originalname_cut.ext
+            const baseName = videoFile.name.replace(/\.[^.]+$/, '');
+            const outputFilename = `${baseName}_cut${ext}`;
+
+            this.onComplete(blob, outputFilename);
 
             return blob;
 

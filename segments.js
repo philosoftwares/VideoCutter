@@ -63,9 +63,31 @@ export class SegmentManager {
     }
 
     /**
-     * Split the segment at the given time position into two segments
+     * Split the segment at the given time position into two segments.
+     * If no segments exist, create a new segment from playhead to end.
      */
     splitSegmentAtTime(time) {
+        const duration = this.timelineManager.getDuration();
+
+        // If no segments exist, create a new one from playhead to end
+        if (this.segments.length === 0) {
+            if (time >= duration - this.minSegmentDuration) {
+                console.warn('Cannot create segment: too close to end');
+                return null;
+            }
+
+            const segment = {
+                id: this.nextId++,
+                start: time,
+                end: duration
+            };
+            this.segments.push(segment);
+            this.renderAll();
+            this.selectSegment(segment.id);
+            this.onSegmentChange();
+            return segment;
+        }
+
         // Find segment that contains this time
         const segment = this.segments.find(s => time > s.start + this.minSegmentDuration && time < s.end - this.minSegmentDuration);
 
@@ -259,11 +281,26 @@ export class SegmentManager {
         const deltaTime = this.timelineManager.pixelsToTime(deltaX);
         const duration = this.timelineManager.getDuration();
         const segment = this.dragState.segment;
+        const playheadTime = this.timelineManager.getCurrentTime();
+
+        // Snap threshold in seconds (based on 10 pixels)
+        const snapThreshold = this.timelineManager.pixelsToTime(10);
 
         if (this.dragState.type === 'move') {
             let newStart = this.dragState.startLeft + deltaTime;
             let newEnd = this.dragState.startRight + deltaTime;
             const segmentDuration = newEnd - newStart;
+
+            // Snap start to playhead
+            if (Math.abs(newStart - playheadTime) < snapThreshold) {
+                newStart = playheadTime;
+                newEnd = newStart + segmentDuration;
+            }
+            // Snap end to playhead
+            if (Math.abs(newEnd - playheadTime) < snapThreshold) {
+                newEnd = playheadTime;
+                newStart = newEnd - segmentDuration;
+            }
 
             // Boundary constraints
             if (newStart < 0) {
@@ -287,6 +324,11 @@ export class SegmentManager {
             if (this.dragState.handle === 'left') {
                 let newStart = this.dragState.startLeft + deltaTime;
 
+                // Snap to playhead
+                if (Math.abs(newStart - playheadTime) < snapThreshold) {
+                    newStart = playheadTime;
+                }
+
                 // Constraints
                 newStart = Math.max(0, newStart);
                 newStart = Math.min(segment.end - this.minSegmentDuration, newStart);
@@ -299,6 +341,11 @@ export class SegmentManager {
                 }
             } else {
                 let newEnd = this.dragState.startRight + deltaTime;
+
+                // Snap to playhead
+                if (Math.abs(newEnd - playheadTime) < snapThreshold) {
+                    newEnd = playheadTime;
+                }
 
                 // Constraints
                 newEnd = Math.min(duration, newEnd);
