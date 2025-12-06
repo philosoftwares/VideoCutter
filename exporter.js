@@ -201,14 +201,20 @@ export class VideoExporter {
                 this.ffmpeg.on('progress', progressHandler);
 
                 try {
-                    // Trim video content from source using fast stream copy
+                    // Trim video content from source
+                    // Using accurate seek: -i before -ss for frame-accurate cutting
+                    // This is slower but produces accurate timestamps
                     this.onStatusChange(`Processing part ${i + 1}/${ranges.length}...`);
 
                     await this.ffmpeg.exec([
-                        '-ss', range.start.toFixed(3),
                         '-i', inputName,
+                        '-ss', range.start.toFixed(3),
                         '-t', duration.toFixed(3),
-                        '-c', 'copy',
+                        '-c:v', 'libx264',
+                        '-preset', 'ultrafast',
+                        '-crf', '18',
+                        '-c:a', 'aac',
+                        '-b:a', '192k',
                         '-avoid_negative_ts', 'make_zero',
                         tempName
                     ]);
