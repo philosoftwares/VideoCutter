@@ -4,52 +4,55 @@
     --bg-secondary: #12121a;
     --bg-tertiary: #1a1a25;
     --bg-hover: #252535;
-    
+
     --accent-primary: #6366f1;
     --accent-secondary: #818cf8;
     --accent-glow: rgba(99, 102, 241, 0.3);
-    
+
     --segment-color: #22c55e;
     --segment-selected: #4ade80;
     --segment-hover: #16a34a;
-    
+
     --text-primary: #ffffff;
     --text-secondary: #a1a1aa;
     --text-muted: #71717a;
-    
+
     --border-color: #27272a;
     --border-focus: #6366f1;
-    
+
     --danger: #ef4444;
     --warning: #f59e0b;
     --success: #22c55e;
-    
+
     --timeline-bg: #18181b;
     --timeline-ruler: #27272a;
     --playhead-color: #ef4444;
-    
+
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    
+
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
-    
+
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 16px;
-    
+
     --transition-fast: 150ms ease;
     --transition-normal: 250ms ease;
 }
 
 /* ===== Reset & Base ===== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-html, body {
+html,
+body {
     height: 100%;
     overflow: hidden;
     font-family: var(--font-family);
@@ -139,8 +142,15 @@ html, body {
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .drop-zone-content h1 {
@@ -198,7 +208,9 @@ html, body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* ===== Buttons ===== */
@@ -385,7 +397,8 @@ html, body {
     border-radius: var(--radius-md);
 }
 
-#current-time, #total-duration {
+#current-time,
+#total-duration {
     font-family: 'Courier New', monospace;
     font-size: 0.95rem;
 }
@@ -444,21 +457,49 @@ html, body {
 }
 
 #timeline-container::-webkit-scrollbar {
-    height: 8px;
+    height: 14px;
 }
 
 #timeline-container::-webkit-scrollbar-track {
     background: var(--bg-tertiary);
-    border-radius: 4px;
+    border-radius: 7px;
 }
 
 #timeline-container::-webkit-scrollbar-thumb {
     background: var(--border-color);
-    border-radius: 4px;
+    border-radius: 7px;
+    border: 2px solid var(--bg-tertiary);
 }
 
 #timeline-container::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
+}
+
+/* Snap toggle checkboxes */
+.snap-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+
+.snap-toggle:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.snap-toggle input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    accent-color: var(--accent-primary);
+    cursor: pointer;
 }
 
 #timeline {
@@ -547,7 +588,7 @@ html, body {
     font-size: 11px;
     font-weight: 600;
     color: #000;
-    text-shadow: 0 1px 1px rgba(255,255,255,0.3);
+    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
     pointer-events: none;
 }
 
@@ -557,7 +598,7 @@ html, body {
     width: 8px;
     height: 100%;
     cursor: ew-resize;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     opacity: 0;
     transition: opacity var(--transition-fast);
 }
@@ -688,9 +729,17 @@ html, body {
 }
 
 @keyframes pop {
-    0% { transform: scale(0); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 .complete-content h2 {
@@ -720,21 +769,21 @@ html, body {
     .drop-zone-content h1 {
         font-size: 1.8rem;
     }
-    
+
     .drop-icon {
         width: 60px;
         height: 60px;
     }
-    
+
     .toolbar-left,
     .toolbar-right {
         gap: 5px;
     }
-    
+
     .btn-tool span {
         display: none;
     }
-    
+
     #file-name {
         max-width: 150px;
     }

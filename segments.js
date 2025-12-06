@@ -153,6 +153,10 @@ export class SegmentManager {
         return start1 < end2 && end1 > start2;
     }
 
+    getSegments() {
+        return this.segments;
+    }
+
     deleteSegment(id) {
         const index = this.segments.findIndex(s => s.id === id);
         if (index !== -1) {
@@ -286,18 +290,21 @@ export class SegmentManager {
         // Snap threshold in seconds (based on 10 pixels)
         const snapThreshold = this.timelineManager.pixelsToTime(10);
 
+        // Check if segment-to-playhead snap is enabled
+        const snapEnabled = document.getElementById('snap-segment-to-playhead')?.checked ?? true;
+
         if (this.dragState.type === 'move') {
             let newStart = this.dragState.startLeft + deltaTime;
             let newEnd = this.dragState.startRight + deltaTime;
             const segmentDuration = newEnd - newStart;
 
             // Snap start to playhead
-            if (Math.abs(newStart - playheadTime) < snapThreshold) {
+            if (snapEnabled && Math.abs(newStart - playheadTime) < snapThreshold) {
                 newStart = playheadTime;
                 newEnd = newStart + segmentDuration;
             }
             // Snap end to playhead
-            if (Math.abs(newEnd - playheadTime) < snapThreshold) {
+            if (snapEnabled && Math.abs(newEnd - playheadTime) < snapThreshold) {
                 newEnd = playheadTime;
                 newStart = newEnd - segmentDuration;
             }
@@ -325,7 +332,7 @@ export class SegmentManager {
                 let newStart = this.dragState.startLeft + deltaTime;
 
                 // Snap to playhead
-                if (Math.abs(newStart - playheadTime) < snapThreshold) {
+                if (snapEnabled && Math.abs(newStart - playheadTime) < snapThreshold) {
                     newStart = playheadTime;
                 }
 
@@ -343,7 +350,7 @@ export class SegmentManager {
                 let newEnd = this.dragState.startRight + deltaTime;
 
                 // Snap to playhead
-                if (Math.abs(newEnd - playheadTime) < snapThreshold) {
+                if (snapEnabled && Math.abs(newEnd - playheadTime) < snapThreshold) {
                     newEnd = playheadTime;
                 }
 

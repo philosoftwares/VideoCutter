@@ -49,6 +49,10 @@ export class TimelineManager {
         this.render();
     }
 
+    setSegmentManager(segmentManager) {
+        this.segmentManager = segmentManager;
+    }
+
     setCurrentTime(time) {
         this.currentTime = Math.max(0, Math.min(time, this.duration));
         this.updatePlayhead();
@@ -140,7 +144,29 @@ export class TimelineManager {
         const rect = this.timeline.getBoundingClientRect();
         // getBoundingClientRect already accounts for scroll position
         const x = e.clientX - rect.left;
-        const time = this.pixelsToTime(x);
+        let time = this.pixelsToTime(x);
+
+        // Check if playhead-to-segment snap is enabled
+        const snapCheckbox = document.getElementById('snap-playhead-to-segment');
+        const snapEnabled = snapCheckbox?.checked ?? true;
+
+        if (snapEnabled && this.segmentManager) {
+            const snapThreshold = this.pixelsToTime(10); // 10px snap threshold
+            const segments = this.segmentManager.getSegments();
+
+            for (const seg of segments) {
+                // Snap to segment start
+                if (Math.abs(time - seg.start) < snapThreshold) {
+                    time = seg.start;
+                    break;
+                }
+                // Snap to segment end
+                if (Math.abs(time - seg.end) < snapThreshold) {
+                    time = seg.end;
+                    break;
+                }
+            }
+        }
 
         this.setCurrentTime(time);
         this.onTimeChange(this.currentTime);
@@ -161,7 +187,29 @@ export class TimelineManager {
         const rect = this.timeline.getBoundingClientRect();
         // getBoundingClientRect already accounts for scroll position
         const x = e.clientX - rect.left;
-        const time = this.pixelsToTime(x);
+        let time = this.pixelsToTime(x);
+
+        // Check if playhead-to-segment snap is enabled
+        const snapCheckbox = document.getElementById('snap-playhead-to-segment');
+        const snapEnabled = snapCheckbox?.checked ?? true;
+
+        if (snapEnabled && this.segmentManager) {
+            const snapThreshold = this.pixelsToTime(10); // 10px snap threshold
+            const segments = this.segmentManager.getSegments();
+
+            for (const seg of segments) {
+                // Snap to segment start
+                if (Math.abs(time - seg.start) < snapThreshold) {
+                    time = seg.start;
+                    break;
+                }
+                // Snap to segment end
+                if (Math.abs(time - seg.end) < snapThreshold) {
+                    time = seg.end;
+                    break;
+                }
+            }
+        }
 
         this.setCurrentTime(time);
         this.onTimeChange(this.currentTime);

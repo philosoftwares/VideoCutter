@@ -206,6 +206,9 @@ class VideoCutterApp {
         this.segmentManager = new SegmentManager(this.timelineManager);
         this.segmentManager.onSegmentChange = () => this.updateSegmentCount();
 
+        // Wire up segment reference for playhead-to-segment snap
+        this.timelineManager.setSegmentManager(this.segmentManager);
+
         // Create initial full segment covering entire video
         this.segmentManager.createFullSegment(this.videoDuration);
 
