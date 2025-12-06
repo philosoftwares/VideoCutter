@@ -425,10 +425,25 @@ body {
 }
 
 #zoom-level {
-    min-width: 50px;
+    width: 55px;
+    padding: 4px 6px;
     text-align: center;
     font-size: 0.85rem;
-    color: var(--text-secondary);
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    outline: none;
+}
+
+#zoom-level:focus {
+    border-color: var(--accent-primary);
+}
+
+#zoom-level::-webkit-inner-spin-button,
+#zoom-level::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 /* Timeline Container */

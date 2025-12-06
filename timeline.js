@@ -42,6 +42,22 @@ export class TimelineManager {
         // Zoom buttons
         document.getElementById('zoom-in-btn').addEventListener('click', () => this.zoomIn());
         document.getElementById('zoom-out-btn').addEventListener('click', () => this.zoomOut());
+
+        // Zoom input - manual entry
+        const zoomInput = document.getElementById('zoom-level');
+        zoomInput.addEventListener('change', (e) => {
+            const value = parseInt(e.target.value, 10);
+            if (!isNaN(value) && value >= 1 && value <= 1000) {
+                this.setZoom(value / 100);
+            } else {
+                e.target.value = Math.round(this.zoom * 100);
+            }
+        });
+        zoomInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.target.blur();
+            }
+        });
     }
 
     setDuration(duration) {
@@ -229,7 +245,7 @@ export class TimelineManager {
         this.zoom = Math.max(this.minZoom, Math.min(this.maxZoom, newZoom));
 
         if (oldZoom !== this.zoom) {
-            document.getElementById('zoom-level').textContent = `${Math.round(this.zoom * 100)}%`;
+            document.getElementById('zoom-level').value = Math.round(this.zoom * 100);
             this.render();
 
             // Dispatch zoom change event for segments
