@@ -206,6 +206,9 @@ class VideoCutterApp {
         this.segmentManager = new SegmentManager(this.timelineManager);
         this.segmentManager.onSegmentChange = () => this.updateSegmentCount();
 
+        // Create initial full segment covering entire video
+        this.segmentManager.createFullSegment(this.videoDuration);
+
         // Create exporter
         this.exporter = new VideoExporter(this.ffmpeg, this.fetchFile);
 
@@ -260,11 +263,11 @@ class VideoCutterApp {
     // ===== Toolbar =====
 
     setupToolbar() {
-        // Scissors button
+        // Scissors button - splits segment at playhead
         document.getElementById('scissors-btn').addEventListener('click', () => {
             if (this.segmentManager && this.timelineManager) {
                 const time = this.timelineManager.getCurrentTime();
-                this.segmentManager.createSegmentAtTime(time);
+                this.segmentManager.splitSegmentAtTime(time);
             }
         });
 
@@ -423,7 +426,7 @@ class VideoCutterApp {
                 case 'c':
                     if (this.segmentManager && this.timelineManager) {
                         const time = this.timelineManager.getCurrentTime();
-                        this.segmentManager.createSegmentAtTime(time);
+                        this.segmentManager.splitSegmentAtTime(time);
                     }
                     break;
 

@@ -22,6 +22,21 @@ export class SegmentManager {
         this.setupEventListeners();
     }
 
+    /**
+     * Create a full segment covering the entire video duration
+     */
+    createFullSegment(duration) {
+        const segment = {
+            id: this.nextId++,
+            start: 0,
+            end: duration
+        };
+        this.segments = [segment];
+        this.renderAll();
+        this.onSegmentChange();
+        return segment;
+    }
+
     setupEventListeners() {
         document.addEventListener('mousemove', (e) => this.onMouseMove(e));
         document.addEventListener('mouseup', (e) => this.onMouseUp(e));
@@ -47,39 +62,38 @@ export class SegmentManager {
         });
     }
 
-    createSegmentAtTime(time) {
-        const duration = this.timelineManager.getDuration();
+    /**
+     * Split the segment at the given time position into two segments
+     */
+    splitSegmentAtTime(time) {
+        // Find segment that contains this time
+        const segment = this.segments.find(s => time > s.start + this.minSegmentDuration && time < s.end - this.minSegmentDuration);
 
-        // Default segment duration: 5 seconds or remaining time
-        const defaultDuration = Math.min(5, duration - time);
-        if (defaultDuration < this.minSegmentDuration) {
-            console.warn('Cannot create segment: not enough time remaining');
+        if (!segment) {
+            console.warn('Cannot split: no segment at this position or too close to edge');
             return null;
         }
 
-        let start = time;
-        let end = time + defaultDuration;
+        // Store original end
+        const originalEnd = segment.end;
 
-        // Check for overlaps and adjust
-        const newSegment = this.findNonOverlappingPosition(start, end);
-        if (!newSegment) {
-            console.warn('Cannot create segment: no space available');
-            return null;
-        }
+        // Modify existing segment to end at cut position
+        segment.end = time;
 
-        const segment = {
+        // Create new segment from cut position to original end
+        const newSegment = {
             id: this.nextId++,
-            start: newSegment.start,
-            end: newSegment.end
+            start: time,
+            end: originalEnd
         };
 
-        this.segments.push(segment);
+        this.segments.push(newSegment);
         this.sortSegments();
         this.renderAll();
-        this.selectSegment(segment.id);
+        this.selectSegment(newSegment.id);
         this.onSegmentChange();
 
-        return segment;
+        return newSegment;
     }
 
     findNonOverlappingPosition(start, end) {

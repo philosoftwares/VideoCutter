@@ -101,46 +101,23 @@ export class VideoExporter {
         }
 
         // Export logic:
-        // - Include gap from 0 to first segment
-        // - Include all segments and gaps between them
-        // - EXCLUDE gap from last segment to end of video
+        // - Only export video segments
+        // - Gaps are skipped (not filled with blank)
+        // - Gap from last segment to end -> NOT exported
 
         const ranges = [];
 
-        // Gap from 0 to first segment (if any)
-        if (sorted[0].start > 0) {
-            ranges.push({
-                start: 0,
-                end: sorted[0].start,
-                type: 'gap'
-            });
-        }
-
-        // Add segments and gaps between them
+        // Add only video segments
         for (let i = 0; i < sorted.length; i++) {
             const seg = sorted[i];
-
             ranges.push({
                 start: seg.start,
                 end: seg.end,
-                type: 'segment'
+                type: 'video'
             });
-
-            // Gap to next segment
-            if (i < sorted.length - 1) {
-                const nextSeg = sorted[i + 1];
-                if (seg.end < nextSeg.start) {
-                    ranges.push({
-                        start: seg.end,
-                        end: nextSeg.start,
-                        type: 'gap'
-                    });
-                }
-            }
         }
 
-        // Merge consecutive ranges
-        return this.mergeRanges(ranges);
+        return ranges;
     }
 
     mergeRanges(ranges) {
@@ -169,20 +146,28 @@ export class VideoExporter {
         const duration = range.end - range.start;
 
         // Setup progress handler
-        this.ffmpeg.on('progress', ({ progress }) => {
-            const percent = 15 + (progress * 80);
+        const progressHandler = ({ progress }) => {
+            // Clamp progress to valid range (FFmpeg can report invalid values)
+            const validProgress = Math.max(0, Math.min(1, progress || 0));
+            const percent = 15 + (validProgress * 80);
             this.onProgress(Math.min(percent, 95));
-        });
+        };
+        this.ffmpeg.on('progress', progressHandler);
 
-        // Use stream copy for fast export
-        await this.ffmpeg.exec([
-            '-ss', range.start.toFixed(3),
-            '-i', inputName,
-            '-t', duration.toFixed(3),
-            '-c', 'copy',
-            '-avoid_negative_ts', 'make_zero',
-            outputName
-        ]);
+        try {
+            // Use stream copy for fast export
+            await this.ffmpeg.exec([
+                '-ss', range.start.toFixed(3),
+                '-i', inputName,
+                '-t', duration.toFixed(3),
+                '-c', 'copy',
+                '-avoid_negative_ts', 'make_zero',
+                outputName
+            ]);
+        } finally {
+            // Remove progress handler to prevent accumulation
+            this.ffmpeg.off('progress', progressHandler);
+        }
 
         return outputName;
     }
@@ -191,7 +176,7 @@ export class VideoExporter {
         const tempFiles = [];
 
         try {
-            // Trim each range
+            // Process each range
             for (let i = 0; i < ranges.length; i++) {
                 if (this.cancelled) throw new Error('Export cancelled');
 
@@ -199,26 +184,34 @@ export class VideoExporter {
                 const tempName = `temp_${i}${ext}`;
                 tempFiles.push(tempName);
 
-                this.onStatusChange(`Processing part ${i + 1}/${ranges.length}...`);
-
                 const duration = range.end - range.start;
 
-                // Progress calculation
+                // Progress calculation - use closure to capture current index
                 const baseProgress = 15 + (i / ranges.length) * 60;
-
-                this.ffmpeg.on('progress', ({ progress }) => {
-                    const percent = baseProgress + (progress * 60 / ranges.length);
+                const progressHandler = ({ progress }) => {
+                    // Clamp progress to valid range (FFmpeg can report invalid values)
+                    const validProgress = Math.max(0, Math.min(1, progress || 0));
+                    const percent = baseProgress + (validProgress * 60 / ranges.length);
                     this.onProgress(Math.min(percent, 85));
-                });
+                };
+                this.ffmpeg.on('progress', progressHandler);
 
-                await this.ffmpeg.exec([
-                    '-ss', range.start.toFixed(3),
-                    '-i', inputName,
-                    '-t', duration.toFixed(3),
-                    '-c', 'copy',
-                    '-avoid_negative_ts', 'make_zero',
-                    tempName
-                ]);
+                try {
+                    // Trim video content from source using fast stream copy
+                    this.onStatusChange(`Processing part ${i + 1}/${ranges.length}...`);
+
+                    await this.ffmpeg.exec([
+                        '-ss', range.start.toFixed(3),
+                        '-i', inputName,
+                        '-t', duration.toFixed(3),
+                        '-c', 'copy',
+                        '-avoid_negative_ts', 'make_zero',
+                        tempName
+                    ]);
+                } finally {
+                    // Remove progress handler to prevent accumulation
+                    this.ffmpeg.off('progress', progressHandler);
+                }
             }
 
             if (this.cancelled) throw new Error('Export cancelled');
@@ -231,14 +224,27 @@ export class VideoExporter {
             const encoder = new TextEncoder();
             await this.ffmpeg.writeFile('concat.txt', encoder.encode(concatList));
 
-            // Concat all parts
-            await this.ffmpeg.exec([
-                '-f', 'concat',
-                '-safe', '0',
-                '-i', 'concat.txt',
-                '-c', 'copy',
-                outputName
-            ]);
+            // Progress handler for concat step (85% to 95%)
+            const concatProgressHandler = ({ progress }) => {
+                // Clamp progress to valid range (FFmpeg can report invalid values)
+                const validProgress = Math.max(0, Math.min(1, progress || 0));
+                const percent = 85 + (validProgress * 10);
+                this.onProgress(Math.min(percent, 95));
+            };
+            this.ffmpeg.on('progress', concatProgressHandler);
+
+            try {
+                // Stream copy - fast concatenation
+                await this.ffmpeg.exec([
+                    '-f', 'concat',
+                    '-safe', '0',
+                    '-i', 'concat.txt',
+                    '-c', 'copy',
+                    outputName
+                ]);
+            } finally {
+                this.ffmpeg.off('progress', concatProgressHandler);
+            }
 
             // Cleanup temp files
             for (const temp of tempFiles) {
