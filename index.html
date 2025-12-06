@@ -61,10 +61,13 @@
             </header>
 
             <main class="editor-main">
-                <div class="video-container">
-                    <video id="video-player" playsinline></video>
-                    <div class="video-controls">
-                        <button id="play-pause-btn" class="btn-icon" title="Play/Pause">
+                <video id="video-player" playsinline></video>
+            </main>
+
+            <footer class="editor-footer">
+                <div class="timeline-toolbar">
+                    <div class="toolbar-left">
+                        <button id="play-pause-btn" class="btn-icon" title="Play/Pause (Space)">
                             <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
                                 <polygon points="5 3 19 12 5 21 5 3" />
                             </svg>
@@ -73,16 +76,12 @@
                                 <rect x="14" y="4" width="4" height="16" />
                             </svg>
                         </button>
-                        <span id="current-time">00:00:00</span>
-                        <span class="time-separator">/</span>
-                        <span id="total-duration">00:00:00</span>
-                    </div>
-                </div>
-            </main>
-
-            <footer class="editor-footer">
-                <div class="timeline-toolbar">
-                    <div class="toolbar-left">
+                        <span class="time-display">
+                            <span id="current-time">00:00:00</span>
+                            <span class="time-separator">/</span>
+                            <span id="total-duration">00:00:00</span>
+                        </span>
+                        <div class="toolbar-divider"></div>
                         <button id="scissors-btn" class="btn-tool" title="Cut at playhead (C)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <circle cx="6" cy="6" r="3" />

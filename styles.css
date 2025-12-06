@@ -381,30 +381,10 @@ body {
 
 #video-player {
     max-width: 100%;
-    max-height: calc(100vh - 280px);
+    max-height: calc(100vh - 220px);
     background: #000;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-lg);
-}
-
-.video-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-top: 15px;
-    padding: 10px 20px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-md);
-}
-
-#current-time,
-#total-duration {
-    font-family: 'Courier New', monospace;
-    font-size: 0.95rem;
-}
-
-.time-separator {
-    color: var(--text-muted);
 }
 
 .icon-pause.hidden,
@@ -437,6 +417,9 @@ body {
 }
 
 .toolbar-center {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     color: var(--text-muted);
     font-size: 0.9rem;
 }
@@ -500,6 +483,29 @@ body {
     height: 14px;
     accent-color: var(--accent-primary);
     cursor: pointer;
+}
+
+/* Toolbar divider */
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    background: var(--border-color);
+    margin: 0 4px;
+}
+
+/* Time display in toolbar */
+.time-display {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    padding: 0 8px;
+}
+
+.time-display .time-separator {
+    color: var(--text-muted);
 }
 
 #timeline {
